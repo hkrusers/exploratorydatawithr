@@ -1,0 +1,343 @@
+---
+title: "R for Exploratory Data Analysis"
+author: "Hong Kong R User Group"
+date: "6/15/2019"
+output: ioslides_presentation
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, message=FALSE, warning = FALSE)
+```
+
+## Join Hong Kong R User Group
+
+We are at meetup:
+
+<https://www.meetup.com/Hong-Kong-R-User-Group/>
+
+And facebook group:
+
+<https://www.facebook.com/groups/hkrusers/>
+
+Today's material on github
+
+<https://github.com/hkrusers/exploratorydatawithr>
+
+
+
+
+## What is R?
+
+R is a free software environment for statistical computing and graphics. 
+
+1. Programming Language
+2. Graphics and statistical packages
+3. Development Environment
+
+
+## R + tidyverse is great for exploratory data analysis
+
+A group of R packages called **tidyverse** is now staple for R community.
+
+```{r, echo=TRUE}
+library(tidyverse)
+```
+
+## Data
+```{r, echo=TRUE}
+euro <- read_csv("euro.csv")
+```
+```{r, echo=FALSE}
+euro <- euro %>%
+  filter(Position !="Goalkeeper", !is.na(Age)) 
+euro %>%
+  select(Name, Stamina, Age, Position, League) %>%
+  head() %>%
+  knitr::kable()
+```
+
+## How do you name this plot?
+
+```{r}
+euro %>%
+  ggplot(aes(x=Age, y=Stamina)) + geom_point()
+
+```
+
+## How about this one?
+
+
+```{r}
+euro %>%
+  ggplot(aes(x=Age, y=Stamina)) + geom_smooth(se = FALSE)
+```
+
+## How about this one?!!
+
+```{r}
+euro %>%
+  ggplot(aes(x=Age, y=Stamina)) + geom_point() +
+  geom_smooth(se=FALSE) -> g
+g
+```
+
+## ggplot2 makes it easy - plot with points
+
+```{r, echo=TRUE}
+euro %>%
+  ggplot(aes(x=Age, y=Stamina)) + geom_point()
+```
+
+
+## Plot with points and smoothing
+```{r, echo=TRUE}
+euro %>%
+  ggplot(aes(x=Age, y=Stamina)) + geom_point() + geom_smooth()
+```
+
+## Plot with Bins
+
+```{r, echo=TRUE}
+euro %>%
+  ggplot(aes(x=Age, y=Stamina)) + geom_bin2d(bins=20) 
+```
+
+## Easy to make plots interactive
+
+```{r, echo=TRUE}
+library(plotly)
+euro %>%ggplot(aes(x=Age, y=Stamina)) + geom_point() + geom_smooth(se=FALSE) -> g
+ggplotly(g)
+```
+
+## Easy to Do Complex Plots
+
+```{r, echo=TRUE}
+euro %>%
+  ggplot(aes(x=Age, y=Stamina, col=Position)) + geom_point() + facet_wrap(League~.)
+```
+
+## 5 verbs for data manipulations
+
+1. Select Columns
+2. Filter Rows
+3. Arrange
+4. Summarise
+5. Mutate
+
+## 1 Select Columns
+
+```{r, echo=TRUE, eval=FALSE}
+euro %>% select(Name, Stamina, Age) 
+```
+
+```{r, echo=FALSE}
+euro %>% select(Name, Stamina, Age) %>% head() %>% knitr::kable()
+```
+
+
+
+## 2 Filter Rows
+
+```{r, echo=TRUE, eval=FALSE}
+euro %>% filter(Stamina<10)
+```
+
+```{r, echo=FALSE}
+euro %>% select(Name, Stamina) %>% filter(Stamina<10) %>% head() %>% knitr::kable()
+```
+
+## 3 Arrange
+
+```{r, echo=TRUE, eval=FALSE}
+euro %>% arrange(Stamina)
+```
+
+```{r}
+euro %>% select(Name, Stamina) %>% arrange(Stamina) %>% head() %>% knitr::kable()
+```
+
+## 4 Summarise
+
+```{r, echo=TRUE, eval=FALSE}
+euro %>%
+  group_by(Position) %>% summarise(mean(Stamina))
+```
+
+```{r}
+euro %>%
+  group_by(Position) %>% summarise(mean(Stamina))%>% knitr::kable()
+```
+
+
+## 4 Summarise (cont.)
+
+```{r, echo=TRUE, eval=FALSE}
+euro %>% 
+  filter(Stamina>10) %>%
+  group_by(Position) %>% summarise(mean(Stamina))
+```
+
+```{r}
+euro %>% 
+  filter(Stamina>10) %>%
+  group_by(Position) %>% summarise(mean(Stamina)) %>% knitr::kable()
+```
+
+## 5 Mutate
+
+```{r, echo=TRUE, eval=FALSE}
+euro %>%
+  mutate(BMI = Weight / (Height / 100)^2)
+```
+
+```{r}
+euro %>%
+  mutate(BMI = Weight / (Height / 100)^2) %>%
+  select(Name, BMI, Weight, Height) %>%
+  head() %>% knitr::kable()
+```
+
+
+## Combining all key words
+
+
+```{r, echo=TRUE, eval=FALSE}
+euro %>%
+  mutate(BMI = Weight / (Height / 100)^2) %>% 
+  select(Name, Weight, Height, BMI) %>%
+  arrange(desc(BMI))
+```
+
+
+```{r}
+euro %>%
+  mutate(BMI = Weight / (Height / 100)^2) %>% 
+  select(Name, Weight, Height, BMI) %>%
+  arrange(desc(BMI)) %>%
+  head() %>%
+  knitr::kable()
+```
+
+## R vs Python - my experience
+
+User of R since 2005.
+
+Use R and Python extensively at work.
+
+## R vs Python
+
+Python Pandas package (from 2008) borrows many ideas from R dataframe.
+
+Python has grown very mature for data science since then with numpy, pandas, scikit-learn.
+
+## R - Easy to Learn
+
+Easy for beginners to understand tidyverse in 2-3 hours.
+
+R User Group occasionally organize beginners classes.
+
+## R - Less Typing and More Expressive
+
+With tidyverse, data manipulation is more expressive
+
+R:
+```{r, echo=TRUE, eval=FALSE}
+euro %>%
+  mutate(BMI = Weight / (Height / 100)^2) %>% 
+  select(Name, Weight, Height, BMI) %>% arrange(desc(BMI))
+```
+
+Python:
+```{r, echo=TRUE, eval=FALSE}
+euro['BMI'] = euro['Weight']/(euro['Height']/100)^2
+euro[['Name' 'Weight', 'Height', 'BMI']].sort_values('BMI')
+```
+
+
+## R - "Big" Data with SQL data source
+```{r, eval=FALSE}
+
+con <- DBI::dbConnect(RSQLite::SQLite(), "./euro.sqlite")
+copy_to(con, euro, "euro",
+  temporary = FALSE
+)
+DBI::dbDisconnect(con)
+
+```
+
+```{r, echo=TRUE}
+con <- DBI::dbConnect(RSQLite::SQLite(), "./euro.sqlite")
+euro_db <- tbl(con, "euro")
+euro_db %>%
+  select(Name, Weight, Height) %>%
+  mutate(BMI = Weight / (Height / 100)^2) %>%
+  arrange(desc(BMI))
+```
+
+## R - export as SQL
+
+```{r, echo=TRUE}
+euro_db %>%
+  select(Name, Weight, Height) %>%
+  mutate(BMI = Weight / (Height / 100)^2) %>%
+  arrange(desc(BMI)) %>%
+  dbplyr::sql_render()
+```
+
+## R - Expressive and High Quality Plotting
+
+
+```{r, echo=TRUE}
+euro %>%
+  ggplot(aes(x=Age, y=Stamina, col=Position)) + geom_point() + facet_wrap(League~.)
+```
+
+## R - Top Quality Statistical Packages
+
+```{r, echo=TRUE}
+sim1 <- read_csv("sim1.csv")
+res <- lm(y~x, data=sim1)
+summary(res)
+```
+
+## Python - Machine Learning
+
+Python Machine Learning libraries are more structured, e.g.:
+
+- Scikit-learn
+- TensorFlow, Keras
+
+## Python as a more general purpose language
+
+Deployment Options
+
+- Expose as webservices
+- Security
+- Testing
+- Integrating with external services
+
+
+## Recommended Reading
+
+R for Data Science by Hadley
+<https://r4ds.had.co.nz>
+
+```{r, fig.height=5}
+knitr::include_graphics("r4dscover.png")
+```
+
+
+## Join Hong Kong R User Group
+
+We are at meetup:
+
+<https://www.meetup.com/Hong-Kong-R-User-Group/>
+
+And facebook group:
+
+<https://www.facebook.com/groups/hkrusers/>
+
+Today's material on github
+
+<https://github.com/hkrusers/exploratorydatawithr>
